@@ -47,3 +47,8 @@ Dieses Skript ist urheberrechtlich geschützt und darf nur mit Genehmigung von C
 ---
 
 © 2024 Clever Scripts. Alle Rechte vorbehalten.
+
+
+![Screenshot 2024-09-14 153648](https://github.com/user-attachments/assets/126e3b07-24fd-40d7-834e-2849af1d0fb9)
+![Screenshot 2024-09-14 153642](https://github.com/user-attachments/assets/5401a2d5-d5c8-4a24-9037-698216aa90fe)
+![Screenshot 2024-09-14 153637](https://github.com/user-attachments/assets/3b3e1f62-4a5b-4914-bd92-fb09d3d73616)
