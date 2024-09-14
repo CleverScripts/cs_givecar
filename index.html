@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fahrzeug Menü</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        #menu {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 2px solid white;
+            padding: 20px;
+            width: 450px;
+            height: 400px;
+            position: relative;
+            overflow-y: auto;
+            background-image: url('logo.png');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+        h2 {
+            color: white;
+            text-align: center;
+            margin-top: 0;
+        }
+        button {
+            display: block;
+            width: calc(33.33% - 10px);
+            padding: 10px;
+            margin: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            float: left;
+        }
+        button:hover {
+            background-color: rgba(230, 230, 230, 0.8);
+        }
+        #searchInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            border: 1px solid #333;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        #categoryList, #vehicleList, #actionList, #playerList {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        #backButton {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: green;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            display: none;
+        }
+        #closeButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <h2>Fahrzeug Menü</h2>
+        <div id="backButton">Zurück</div>
+        <div id="closeButton">X</div>
+        <div id="categoryList"></div>
+        <div id="vehicleList" style="display: none;">
+            <input type="text" id="searchInput" placeholder="Fahrzeug suchen...">
+            <div id="vehicleButtons"></div>
+        </div>
+        <div id="actionList" style="display: none;">
+            <button onclick="spawnVehicle()">Spawnen</button>
+            <button onclick="showPlayerList()">In Garage stellen</button>
+        </div>
+        <div id="playerList" style="display: none;"></div>
+    </div>
+
+    <script>
+        let categories = [];
+        let vehicles = [];
+        let players = [];
+        let currentView = 'categories';
+        let selectedVehicle = null;
+
+        function selectCategory(category) {
+            sendData('selectCategory', {category: category});
+            currentView = 'vehicles';
+            document.getElementById('categoryList').style.display = 'none';
+            document.getElementById('vehicleList').style.display = 'block';
+            document.getElementById('backButton').style.display = 'block';
+            document.getElementById('searchInput').value = '';
+        }
+
+        function selectVehicle(model, name) {
+            selectedVehicle = { model: model, name: name };
+            document.getElementById('vehicleList').style.display = 'none';
+            document.getElementById('actionList').style.display = 'block';
+            currentView = 'actions';
+        }
+
+        function spawnVehicle() {
+            if (selectedVehicle) {
+                sendData('spawnVehicle', {model: selectedVehicle.model});
+                closeMenu();
+            }
+        }
+
+        function showPlayerList() {
+            console.log("Requesting player list");
+            sendData('getPlayers', {});
+            document.getElementById('actionList').style.display = 'none';
+            document.getElementById('playerList').style.display = 'block';
+            currentView = 'players';
+        }
+
+        function addToGarage(playerId) {
+            if (selectedVehicle) {
+                sendData('addToGarage', {model: selectedVehicle.model, playerId: playerId});
+                closeMenu();
+            }
+        }
+
+        function sendData(event, data) {
+            fetch(`https://${GetParentResourceName()}/${event}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                },
+                body: JSON.stringify(data)
+            }).catch(err => console.error(err));
+        }
+
+        function updateCategoryList() {
+            const categoryList = document.getElementById('categoryList');
+            categoryList.innerHTML = '';
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.onclick = () => selectCategory(category);
+                categoryList.appendChild(button);
+            });
+        }
+
+        function updateVehicleList(searchTerm = '') {
+            const vehicleButtons = document.getElementById('vehicleButtons');
+            vehicleButtons.innerHTML = '';
+            const filteredVehicles = vehicles.filter(vehicle => 
+                vehicle.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            filteredVehicles.forEach(vehicle => {
+                const button = document.createElement('button');
+                button.textContent = vehicle.name;
+                button.onclick = () => selectVehicle(vehicle.model, vehicle.name);
+                vehicleButtons.appendChild(button);
+            });
+        }
+
+        function updatePlayerList() {
+            const playerList = document.getElementById('playerList');
+            playerList.innerHTML = '';
+            players.forEach(player => {
+                const button = document.createElement('button');
+                button.textContent = player.name;
+                button.onclick = () => addToGarage(player.id);
+                playerList.appendChild(button);
+            });
+        }
+
+        function goBack() {
+            if (currentView === 'vehicles') {
+                currentView = 'categories';
+                document.getElementById('categoryList').style.display = 'flex';
+                document.getElementById('vehicleList').style.display = 'none';
+                document.getElementById('backButton').style.display = 'none';
+                document.getElementById('searchInput').value = '';
+            } else if (currentView === 'actions') {
+                currentView = 'vehicles';
+                document.getElementById('vehicleList').style.display = 'block';
+                document.getElementById('actionList').style.display = 'none';
+            } else if (currentView === 'players') {
+                currentView = 'actions';
+                document.getElementById('actionList').style.display = 'block';
+                document.getElementById('playerList').style.display = 'none';
+            }
+        }
+
+        function closeMenu() {
+            sendData('closeMenu', {});
+        }
+
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (data.type === "setDisplay") {
+                document.body.style.display = data.status ? 'flex' : 'none';
+                if (data.status) {
+                    categories = data.categories;
+                    updateCategoryList();
+                    goBack();
+                }
+            } else if (data.type === "updateVehicles") {
+                vehicles = data.vehicles;
+                updateVehicleList();
+            } else if (data.type === "updatePlayers") {
+                players = data.players;
+                updatePlayerList();
+            }
+        });
+
+        document.getElementById('backButton').addEventListener('click', goBack);
+        document.getElementById('closeButton').addEventListener('click', closeMenu);
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            updateVehicleList(e.target.value);
+        });
+
+        document.onkeyup = function (data) {
+            if (data.which == 27) {
+                closeMenu();
+            }
+        };
+    </script>
+</body>
+</html>
