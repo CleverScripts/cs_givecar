@@ -34,7 +34,7 @@ Das Clever Scripts Fahrzeugmenü ist ein leistungsstarkes und benutzerfreundlich
 ## Abhängigkeiten
 
 - ESX Framework
-- pxmysql
+- oxmysql
 
 ## Support
 
