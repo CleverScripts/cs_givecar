@@ -38,7 +38,7 @@ Das Clever Scripts Fahrzeugmenü ist ein leistungsstarkes und benutzerfreundlich
 
 ## Support
 
-Bei Fragen oder Problemen wenden Sie sich bitte an unser Support-Team unter cleverschripts@gmail.com.
+Bei Fragen oder Problemen wenden Sie sich bitte an unser Support-Team unter cleverschripts@gmail.com oder über Discord: https://discord.gg/HT9SJXQ9gC.
 
 ## Lizenz
 
